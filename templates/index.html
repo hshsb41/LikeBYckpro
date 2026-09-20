@@ -1,1 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ brand }} — VIP Like Service</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-main:#0a0b0e;
+    --card-bg:#12141c;
+    --input-bg:#0d0e13;
+    --accent:#3b82f6;
+    --accent-hover:#2563eb;
+    --text:#f3f4f6;
+    --muted:#9ca3af;
+    --green:#10b981;
+    --red:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Rajdhani',sans-serif;
+    background:var(--bg-main);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .wrap{
+    width:100%;
+    max-width:440px;
+  }
 
+  .card{
+    background:var(--card-bg);
+    border-radius:14px;
+    padding:24px;
+    border:none;
+    box-shadow:none;
+  }
+  .card + .card{margin-top:16px;}
+
+  .field{margin-bottom:16px;}
+  .field:last-of-type{margin-bottom:20px;}
+
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  input{
+    width:100%;
+    padding:12px 14px;
+    background:var(--input-bg);
+    border:none;
+    border-radius:10px;
+    color:var(--text);
+    font-size:15px;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    outline:none;
+    box-shadow:none;
+  }
+
+  .regions{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+  }
+  .chip{
+    text-align:center;
+    padding:10px 4px;
+    border-radius:8px;
+    background:var(--input-bg);
+    border:none;
+    color:var(--muted);
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+    transition:0.2s;
+  }
+  .chip:hover{
+    color:var(--text);
+  }
+  .chip.active{
+    color:#fff;
+    background:var(--accent);
+  }
+
+  .btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:1px;
+    color:#fff;
+    background:var(--accent);
+    cursor:pointer;
+    transition:background 0.2s;
+    box-shadow:none;
+  }
+  .btn:hover{background:var(--accent-hover);}
+  .btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .btn .spinner{
+    display:inline-block;
+    width:14px;height:14px;
+    border:2px solid rgba(255,255,255,0.3);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+    vertical-align:middle;
+    margin-right:6px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .result{display:none;}
+  .result.show{display:block;}
+
+  .player-header{
+    text-align:center;
+    padding-bottom:14px;
+    border:none;
+    margin-bottom:14px;
+  }
+  .player-name{
+    font-size:20px;
+    font-weight:700;
+    color:var(--text);
+    word-break:break-word;
+  }
+  .player-uid{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:2px;
+  }
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+  .stat{
+    padding:12px;
+    border-radius:10px;
+    background:var(--input-bg);
+    border:none;
+  }
+  .stat .k{
+    font-size:11px;
+    letter-spacing:1px;
+    color:var(--muted);
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .stat .v{
+    margin-top:4px;
+    font-size:18px;
+    font-weight:700;
+    color:var(--text);
+  }
+
+  .status-pill{
+    display:inline-block;
+    margin-top:10px;
+    padding:4px 12px;
+    border-radius:20px;
+    font-weight:700;
+    font-size:12px;
+    text-transform:uppercase;
+  }
+  .status-ok{background:rgba(16,185,129,0.15);color:var(--green);}
+  .status-fail{background:rgba(239,68,68,0.15);color:var(--red);}
+
+  .error-box{
+    padding:12px;
+    border-radius:10px;
+    background:rgba(239,68,68,0.1);
+    border:none;
+    color:#fca5a5;
+    font-weight:600;
+    font-size:14px;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:16px;
+    color:var(--muted);
+    font-size:12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <div class="field">
+      <label></label>
+      <input id="uid" type="text" inputmode="numeric" placeholder="Enter UID" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label></label>
+      <input id="key" type="text" placeholder="Enter API Key" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label></label>
+      <div class="regions" id="regions">
+        <div class="chip active" data-region="BD">BD</div>
+        <div class="chip" data-region="IND">IND</div>
+        <div class="chip" data-region="BR">BR</div>
+        <div class="chip" data-region="US">US</div>
+        <div class="chip" data-region="SAC">SAC</div>
+        <div class="chip" data-region="NA">NA</div>
+      </div>
+    </div>
+
+    <button class="btn" id="submitBtn">Send Likes</button>
+  </div>
+
+  <div class="card result" id="resultCard">
+    <div id="resultBody"></div>
+  </div>
+
+  <footer>
+    {{ brand }}
+  </footer>
+
+</div>
+
+<script>
+const API_BASE = "";
+
+let selectedRegion = "BD";
+const chips = document.querySelectorAll(".chip");
+chips.forEach(c => {
+  c.addEventListener("click", () => {
+    chips.forEach(x => x.classList.remove("active"));
+    c.classList.add("active");
+    selectedRegion = c.dataset.region;
+  });
+});
+
+const btn = document.getElementById("submitBtn");
+const resultCard = document.getElementById("resultCard");
+const resultBody = document.getElementById("resultBody");
+
+btn.addEventListener("click", async () => {
+  const uid = document.getElementById("uid").value.trim();
+  const key = document.getElementById("key").value.trim();
+
+  if (!uid) { showError("Please enter a Player UID"); return; }
+  if (!key) { showError("Please enter your API Key"); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Processing...';
+  resultCard.classList.remove("show");
+
+  try {
+    const url = `${API_BASE}/like?uid=${encodeURIComponent(uid)}&server_name=${encodeURIComponent(selectedRegion)}&key=${encodeURIComponent(key)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (!resp.ok || data.error) {
+      showError(data.error || `Request failed (${resp.status})`);
+      return;
+    }
+    showResult(data);
+  } catch (e) {
+    showError("Network error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Send Likes";
+  }
+});
+
+function showError(msg) {
+  resultBody.innerHTML = `<div class="error-box">${escapeHtml(msg)}</div>`;
+  resultCard.classList.add("show");
+}
+
+function showResult(d) {
+  const ok = d.status === 1;
+  const pill = ok
+    ? `<div class="status-pill status-ok">Success</div>`
+    : `<div class="status-pill status-fail">No Likes Given</div>`;
+
+  resultBody.innerHTML = `
+    <div class="player-header">
+      <div class="player-name">${escapeHtml(d.PlayerNickname || "Unknown")}</div>
+      <div class="player-uid">UID: ${escapeHtml(String(d.UID || ""))}</div>
+      ${pill}
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="k">Before</div>
+        <div class="v">${d.LikesbeforeCommand ?? 0}</div>
+      </div>
+      <div class="stat">
+        <div class="k">After</div>
+        <div class="v">${d.LikesafterCommand ?? 0}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Given</div>
+        <div class="v">+${d.LikesGivenByAPI ?? 0}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Gift</div>
+        <div class="v">${d.GiftCount ?? 0}</div>
+      </div>
+    </div>
+  `;
+  resultCard.classList.add("show");
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+</script>
+</body>
+</html>
